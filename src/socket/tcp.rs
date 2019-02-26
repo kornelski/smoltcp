@@ -1608,7 +1608,9 @@ impl<'a> TcpSocket<'a> {
         self.remote_last_ack = repr.ack_number;
         self.remote_last_win = repr.window_len;
 
-        if !self.seq_to_transmit() && repr.segment_len() > 0 {
+        if (!self.seq_to_transmit() && repr.segment_len() > 0)
+            || self.timer.should_retransmit(timestamp).is_some()
+        {
             // If we've transmitted all data we could (and there was something at all,
             // data or flag, to transmit, not just an ACK), wind up the retransmit timer.
             self.timer.set_for_retransmit(timestamp);
